@@ -1,0 +1,4 @@
+Instrucciones de SlotMachineB:
+1. Gira las ruedas y espera el resultado.
+2. Si tienes al menos dos símbolos iguales, ganas.
+3. Apuesta mínima: 20.
