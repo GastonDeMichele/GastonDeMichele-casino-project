@@ -127,11 +127,18 @@ function playRouletteGame(type, value, amount) {
 function playBlackjack() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Has elegido: Blackjack");
-        console.log((0, FileReader_1.readInstructions)("Blackjack"));
+        console.log("Instrucciones: Blackjack es un juego de cartas donde el objetivo es acercarse lo más posible a 21 puntos sin pasarse.");
         const minBet = 10;
         console.log(`La apuesta mínima es ${minBet}.`);
+        let betAmount = parseInt(yield askQuestion(`¿Cuánto deseas apostar? (La apuesta mínima es ${minBet}): `), 10);
+        while (isNaN(betAmount) || betAmount < minBet) {
+            console.log(`Apuesta inválida. La apuesta mínima es ${minBet}.`);
+            betAmount = parseInt(yield askQuestion(`¿Cuánto deseas apostar? (La apuesta mínima es ${minBet}): `), 10);
+        }
         const blackjack = new BlackJack_1.Blackjack(minBet);
-        const resultMessage = blackjack.play();
+        blackjack.betAmount = betAmount;
+        // Usamos await para esperar el resultado del juego
+        const resultMessage = yield blackjack.play(); // Cambié esta línea para esperar la promesa
         console.log(resultMessage);
     });
 }
