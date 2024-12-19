@@ -130,11 +130,6 @@ function playBlackjack() {
         console.log((0, FileReader_1.readInstructions)("Blackjack"));
         const minBet = 10;
         console.log(`La apuesta mínima es ${minBet}.`);
-        const betAmount = parseInt(yield askQuestion("¿Cuánto deseas apostar? "), 10);
-        if (isNaN(betAmount) || betAmount < minBet) {
-            console.log(`Apuesta inválida. La apuesta mínima es ${minBet}.`);
-            return;
-        }
         const blackjack = new BlackJack_1.Blackjack(minBet);
         const resultMessage = blackjack.play();
         console.log(resultMessage);

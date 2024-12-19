@@ -1,6 +1,6 @@
 import * as readlineSync from "readline-sync";
 
-// Asegúrate de exportar la clase Blackjack// Asegúrate de exportar la clase Blackjack
+// Asegúrate de exportar la clase Blackjack
 export class Blackjack {
     private playerHand: number[];
     private dealerHand: number[];
@@ -32,7 +32,6 @@ export class Blackjack {
                 total += card;
             }
         }
-        
 
         // Ajustar valor de los Ases si el total supera 21
         while (total > 21 && aces > 0) {
@@ -59,22 +58,15 @@ export class Blackjack {
         while (playerTotal < 21) {
             console.log(`Tus cartas: ${this.playerHand.join(", ")} (Total: ${playerTotal})`);
             console.log(`Carta visible del dealer: ${this.dealerHand[0]}`);
-            const action = readlineSync.question("¿Qué deseas hacer? (hit = pedir carta / stand = plantarte): ").trim().toLowerCase();
-
-            if (action === "hit") {
-                const newCard = this.drawCard();
-                this.playerHand.push(newCard);
+            const choice = readlineSync.question("¿Quieres pedir carta (hit) o plantarte (stand)? (h/s): ");
+            if (choice === "h") {
+                this.playerHand.push(this.drawCard());
                 playerTotal = this.calculateHandTotal(this.playerHand);
-                console.log(`Recibiste: ${newCard}. Total actual: ${playerTotal}`);
-            } else if (action === "stand") {
+            } else if (choice === "s") {
                 break;
             } else {
-                console.log("Opción no válida. Por favor, escribe 'hit' o 'stand'.");
+                console.log("Opción no válida.");
             }
-        }
-
-        if (playerTotal > 21) {
-            console.log("¡Te has pasado de 21! Has perdido.");
         }
     }
 
@@ -83,50 +75,54 @@ export class Blackjack {
         console.log(`Cartas del dealer: ${this.dealerHand.join(", ")} (Total: ${dealerTotal})`);
 
         while (dealerTotal < 17) {
-            const newCard = this.drawCard();
-            this.dealerHand.push(newCard);
+            console.log("El dealer pide carta...");
+            this.dealerHand.push(this.drawCard());
             dealerTotal = this.calculateHandTotal(this.dealerHand);
-            console.log(`El dealer recibe: ${newCard}. Total actual: ${dealerTotal}`);
-        }
-
-        if (dealerTotal > 21) {
-            console.log("El dealer se pasó de 21. ¡Has ganado!");
+            console.log(`Cartas del dealer: ${this.dealerHand.join(", ")} (Total: ${dealerTotal})`);
         }
     }
 
-    public play(): void {
-        console.log("¡Bienvenido al Blackjack!");
-        this.getBet(); // Obtener apuesta inicial
+    public play(): string {
+        console.log("Comienza el juego de Blackjack.");
 
-        // Repartir cartas iniciales
+        // Pedir la apuesta
+        this.getBet();
+
+        // Repartir las cartas
         this.playerHand = [this.drawCard(), this.drawCard()];
         this.dealerHand = [this.drawCard(), this.drawCard()];
 
-        // Mostrar cartas iniciales
-        console.log(`Tus cartas: ${this.playerHand.join(", ")} (Total: ${this.calculateHandTotal(this.playerHand)})`);
+        // Mostrar las cartas
+        console.log(`Tus cartas: ${this.playerHand.join(", ")}`);
         console.log(`Carta visible del dealer: ${this.dealerHand[0]}`);
 
         // Turno del jugador
         this.playerTurn();
 
-        if (this.calculateHandTotal(this.playerHand) > 21) {
-            return; // El jugador ya perdió, no continuamos con el dealer
-        }
-
         // Turno del dealer
         this.dealerTurn();
 
-        // Determinar el resultado final
+        // Mostrar los resultados
         const playerTotal = this.calculateHandTotal(this.playerHand);
         const dealerTotal = this.calculateHandTotal(this.dealerHand);
 
-        if (dealerTotal > 21 || playerTotal > dealerTotal) {
-            const payout = this.betAmount * 2;
-            console.log(`¡Ganaste ${payout}!`);
-        } else if (playerTotal === dealerTotal) {
-            console.log("Es un empate. Recuperas tu apuesta.");
+        console.log(`Tus cartas finales: ${this.playerHand.join(", ")} (Total: ${playerTotal})`);
+        console.log(`Cartas finales del dealer: ${this.dealerHand.join(", ")} (Total: ${dealerTotal})`);
+
+        if (playerTotal > 21) {
+            return "Te has pasado de 21. Has perdido.";
+        }
+
+        if (dealerTotal > 21) {
+            return `El dealer se pasó de 21. Has ganado ${this.betAmount * 2}.`;
+        }
+
+        if (playerTotal > dealerTotal) {
+            return `¡Felicidades! Has ganado ${this.betAmount * 2}.`;
+        } else if (playerTotal < dealerTotal) {
+            return `Lo siento, has perdido.`;
         } else {
-            console.log("Perdiste. Mejor suerte la próxima vez.");
+            return "Empate.";
         }
     }
 }

@@ -130,12 +130,6 @@ async function playBlackjack() {
 
   const minBet = 10;
   console.log(`La apuesta mínima es ${minBet}.`);
-  const betAmount = parseInt(await askQuestion("¿Cuánto deseas apostar? "), 10);
-
-  if (isNaN(betAmount) || betAmount < minBet) {
-    console.log(`Apuesta inválida. La apuesta mínima es ${minBet}.`);
-    return;
-  }
 
   const blackjack = new Blackjack(minBet);
   
