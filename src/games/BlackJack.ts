@@ -1,62 +1,132 @@
-// src/games/Blackjack.ts
-import { AbstractGame } from "../abstract/AbstractGame";
+import * as readlineSync from "readline-sync";
 
-export class Blackjack extends AbstractGame {
+// Asegúrate de exportar la clase Blackjack// Asegúrate de exportar la clase Blackjack
+export class Blackjack {
     private playerHand: number[];
     private dealerHand: number[];
+    private minBet: number;
+    private betAmount: number;
 
     constructor(minBet: number) {
-        super(minBet);
+        this.minBet = minBet;
+        this.betAmount = 0;
         this.playerHand = [];
         this.dealerHand = [];
     }
 
-    // Genera una carta aleatoria (1 a 11)
     private drawCard(): number {
-        return Math.floor(Math.random() * 11) + 1;
+        return Math.floor(Math.random() * 13) + 1; // Cartas de 1 a 13 (1 = As, 11 = J, 12 = Q, 13 = K)
     }
 
     private calculateHandTotal(hand: number[]): number {
-        return hand.reduce((total, card) => total + card, 0);
-    }
+        let total = 0;
+        let aces = 0;
 
-    setBet(amount: number, type: string, value: number | string): string {
-        if (amount < this.minBet) {
-            return `La apuesta mínima es ${this.minBet}.`;
+        for (const card of hand) {
+            if (card > 10) {
+                total += 10; // J, Q, K valen 10
+            } else if (card === 1) {
+                aces++;
+                total += 11; // As inicialmente cuenta como 11
+            } else {
+                total += card;
+            }
+        }
+        
+
+        // Ajustar valor de los Ases si el total supera 21
+        while (total > 21 && aces > 0) {
+            total -= 10; // Cambia un As de 11 a 1
+            aces--;
         }
 
-        this.bet = { amount, type, value };
-        return `Apuesta de ${amount} registrada para Blackjack.`;
+        return total;
     }
 
-    play(): string {
-        if (this.bet.amount === 0) {
-            return "No hay una apuesta configurada.";
+    private getBet(): void {
+        let bet: number = 0;
+        while (bet < this.minBet) {
+            bet = parseInt(readlineSync.question(`Tu apuesta mínima es ${this.minBet}. Ingresa la cantidad a apostar: `), 10);
+            if (bet < this.minBet) {
+                console.log(`La apuesta mínima es ${this.minBet}. Por favor, ingresa una cantidad válida.`);
+            }
         }
+        this.betAmount = bet;
+    }
+
+    private playerTurn(): void {
+        let playerTotal = this.calculateHandTotal(this.playerHand);
+        while (playerTotal < 21) {
+            console.log(`Tus cartas: ${this.playerHand.join(", ")} (Total: ${playerTotal})`);
+            console.log(`Carta visible del dealer: ${this.dealerHand[0]}`);
+            const action = readlineSync.question("¿Qué deseas hacer? (hit = pedir carta / stand = plantarte): ").trim().toLowerCase();
+
+            if (action === "hit") {
+                const newCard = this.drawCard();
+                this.playerHand.push(newCard);
+                playerTotal = this.calculateHandTotal(this.playerHand);
+                console.log(`Recibiste: ${newCard}. Total actual: ${playerTotal}`);
+            } else if (action === "stand") {
+                break;
+            } else {
+                console.log("Opción no válida. Por favor, escribe 'hit' o 'stand'.");
+            }
+        }
+
+        if (playerTotal > 21) {
+            console.log("¡Te has pasado de 21! Has perdido.");
+        }
+    }
+
+    private dealerTurn(): void {
+        let dealerTotal = this.calculateHandTotal(this.dealerHand);
+        console.log(`Cartas del dealer: ${this.dealerHand.join(", ")} (Total: ${dealerTotal})`);
+
+        while (dealerTotal < 17) {
+            const newCard = this.drawCard();
+            this.dealerHand.push(newCard);
+            dealerTotal = this.calculateHandTotal(this.dealerHand);
+            console.log(`El dealer recibe: ${newCard}. Total actual: ${dealerTotal}`);
+        }
+
+        if (dealerTotal > 21) {
+            console.log("El dealer se pasó de 21. ¡Has ganado!");
+        }
+    }
+
+    public play(): void {
+        console.log("¡Bienvenido al Blackjack!");
+        this.getBet(); // Obtener apuesta inicial
 
         // Repartir cartas iniciales
         this.playerHand = [this.drawCard(), this.drawCard()];
         this.dealerHand = [this.drawCard(), this.drawCard()];
 
+        // Mostrar cartas iniciales
+        console.log(`Tus cartas: ${this.playerHand.join(", ")} (Total: ${this.calculateHandTotal(this.playerHand)})`);
+        console.log(`Carta visible del dealer: ${this.dealerHand[0]}`);
+
+        // Turno del jugador
+        this.playerTurn();
+
+        if (this.calculateHandTotal(this.playerHand) > 21) {
+            return; // El jugador ya perdió, no continuamos con el dealer
+        }
+
+        // Turno del dealer
+        this.dealerTurn();
+
+        // Determinar el resultado final
         const playerTotal = this.calculateHandTotal(this.playerHand);
         const dealerTotal = this.calculateHandTotal(this.dealerHand);
 
-        // Evaluar resultado del juego
-        if (playerTotal > 21) {
-            return this.buildResultMessage(playerTotal, dealerTotal, "Perdiste por pasarte de 21.");
-        }
-        
         if (dealerTotal > 21 || playerTotal > dealerTotal) {
-            const payout = this.bet.amount * 2;
-            return this.buildResultMessage(playerTotal, dealerTotal, `¡Ganaste ${payout}!`);
+            const payout = this.betAmount * 2;
+            console.log(`¡Ganaste ${payout}!`);
+        } else if (playerTotal === dealerTotal) {
+            console.log("Es un empate. Recuperas tu apuesta.");
+        } else {
+            console.log("Perdiste. Mejor suerte la próxima vez.");
         }
-
-        return this.buildResultMessage(playerTotal, dealerTotal, "Perdiste. Mejor suerte la próxima vez.");
-    }
-
-    private buildResultMessage(playerTotal: number, dealerTotal: number, result: string): string {
-        return `Tus cartas: ${this.playerHand.join(", ")} (Total: ${playerTotal}).\n` +
-               `Cartas del dealer: ${this.dealerHand.join(", ")} (Total: ${dealerTotal}).\n` +
-               `${result}`;
     }
 }

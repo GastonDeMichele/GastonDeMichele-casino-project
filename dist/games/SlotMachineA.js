@@ -1,24 +1,41 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SlotMachineA = void 0;
-class SlotMachineA {
+const AbstractGame_1 = require("../abstract/AbstractGame");
+class SlotMachineA extends AbstractGame_1.AbstractGame {
     constructor(minBet) {
-        this.minBet = minBet;
+        super(minBet); // Pasamos el minBet al constructor de la clase base AbstractGame
+        this.symbols = ["🍒", "🍇", "🍉", "🍊", "🍋"];
     }
-    // Función para jugar a la tragamonedas
+    // Método play que no recibe parámetros. La apuesta se usa desde la propiedad 'bet' en AbstractGame.
     play() {
-        const randomOutcome = Math.random();
-        let resultMessage = "";
-        if (randomOutcome < 0.1) {
-            resultMessage = "¡Ganaste el premio mayor!";
+        if (this.bet.amount < this.minBet) {
+            return `La apuesta mínima es ${this.minBet}.`;
         }
-        else if (randomOutcome < 0.5) {
-            resultMessage = "¡Ganaste algo!";
+        const result = this.spinReels();
+        const win = this.checkWin(result);
+        const payout = this.calculatePayout(win);
+        return this.buildResultMessage(result, win, payout);
+    }
+    spinReels() {
+        const result = [];
+        for (let i = 0; i < 3; i++) {
+            const randomIndex = Math.floor(Math.random() * this.symbols.length);
+            result.push(this.symbols[randomIndex]);
         }
-        else {
-            resultMessage = "¡Perdiste! Intenta de nuevo.";
-        }
-        return resultMessage;
+        return result;
+    }
+    checkWin(result) {
+        return result[0] === result[1] && result[1] === result[2];
+    }
+    calculatePayout(win) {
+        return win ? this.bet.amount * 10 : 0;
+    }
+    buildResultMessage(result, win, payout) {
+        const resultDescription = `Resultados de la tirada: ${result.join(" | ")}.`;
+        return win
+            ? `${resultDescription} ¡Ganaste! Has ganado ${payout}.`
+            : `${resultDescription} Lo siento, no has ganado esta vez.`;
     }
 }
 exports.SlotMachineA = SlotMachineA;

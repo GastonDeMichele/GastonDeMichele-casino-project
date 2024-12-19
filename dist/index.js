@@ -15,9 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const readline_1 = __importDefault(require("readline"));
 const FileReader_1 = require("./utils/FileReader");
 const BlackJack_1 = require("./games/BlackJack");
-// Importar las clases de las Slot Machines si es necesario
-// import { SlotMachineA } from "./games/SlotMachineA";
-// import { SlotMachineB } from "./games/SlotMachineB";
+const SlotMachineA_1 = require("./games/SlotMachineA"); // Importar SlotMachineA
+const SlotMachineB_1 = require("./games/SlotMachineB"); // Importar SlotMachineB
 // Inicialización de la interfaz de entrada/salida
 const rl = readline_1.default.createInterface({
     input: process.stdin,
@@ -137,7 +136,6 @@ function playBlackjack() {
             return;
         }
         const blackjack = new BlackJack_1.Blackjack(minBet);
-        console.log(blackjack.setBet(betAmount, "Blackjack", ""));
         const resultMessage = blackjack.play();
         console.log(resultMessage);
     });
@@ -147,8 +145,22 @@ function playSlotMachine(gameName) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(`Has elegido: ${gameName}`);
         console.log((0, FileReader_1.readInstructions)(gameName));
-        // Aquí llamamos la lógica correspondiente para jugar Slot Machine A o B
-        // Las Slot Machines pueden ser similares a los otros juegos, solo tienes que implementar las clases similares a las de Blackjack y Roulette.
+        let slotMachine; // Cambia el tipo a la clase correcta
+        const minBet = 10; // Apuesta mínima
+        const betAmount = parseInt(yield askQuestion(`¿Cuánto deseas apostar? (La apuesta mínima es ${minBet}): `), 10);
+        if (isNaN(betAmount) || betAmount < minBet) {
+            console.log(`Apuesta inválida. La apuesta mínima es ${minBet}.`);
+            return;
+        }
+        if (gameName === "SlotMachineA") {
+            slotMachine = new SlotMachineA_1.SlotMachineA(minBet);
+        }
+        else {
+            slotMachine = new SlotMachineB_1.SlotMachineB(minBet);
+        }
+        slotMachine.setBet(betAmount);
+        const resultMessage = slotMachine.play();
+        console.log(resultMessage);
     });
 }
 main();

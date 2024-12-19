@@ -6,7 +6,7 @@ class AbstractGame {
         this.minBet = minBet;
         this.bet = { amount: 0, type: "", value: "" };
     }
-    // Método modificado para Blackjack, ahora solo se usa amount
+    // Este es el método setBet que es común a todas las clases que heredan de AbstractGame
     setBet(amount, type = "", value = "") {
         if (amount < this.minBet) {
             return `La apuesta mínima es ${this.minBet}.`;

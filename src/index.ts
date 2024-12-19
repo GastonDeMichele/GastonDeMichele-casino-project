@@ -2,9 +2,8 @@ import readline from "readline";
 import { readInstructions } from "./utils/FileReader";
 import { Blackjack } from "./games/BlackJack";
 import { Roulette } from "./games/Roulette";
-// Importar las clases de las Slot Machines si es necesario
-// import { SlotMachineA } from "./games/SlotMachineA";
-// import { SlotMachineB } from "./games/SlotMachineB";
+import { SlotMachineA } from "./games/SlotMachineA"; // Importar SlotMachineA
+import { SlotMachineB } from "./games/SlotMachineB"; // Importar SlotMachineB
 
 // Inicialización de la interfaz de entrada/salida
 const rl = readline.createInterface({
@@ -139,7 +138,7 @@ async function playBlackjack() {
   }
 
   const blackjack = new Blackjack(minBet);
-  console.log(blackjack.setBet(betAmount, "Blackjack", ""));
+  
 
   const resultMessage = blackjack.play();
   console.log(resultMessage);
@@ -150,8 +149,26 @@ async function playSlotMachine(gameName: string) {
   console.log(`Has elegido: ${gameName}`);
   console.log(readInstructions(gameName));
 
-  // Aquí llamamos la lógica correspondiente para jugar Slot Machine A o B
-  // Las Slot Machines pueden ser similares a los otros juegos, solo tienes que implementar las clases similares a las de Blackjack y Roulette.
+  let slotMachine: SlotMachineA | SlotMachineB; // Cambia el tipo a la clase correcta
+  const minBet = 10; // Apuesta mínima
+
+  const betAmount = parseInt(await askQuestion(`¿Cuánto deseas apostar? (La apuesta mínima es ${minBet}): `), 10);
+
+  if (isNaN(betAmount) || betAmount < minBet) {
+    console.log(`Apuesta inválida. La apuesta mínima es ${minBet}.`);
+    return;
+  }
+
+  if (gameName === "SlotMachineA") {
+    slotMachine = new SlotMachineA(minBet);
+  } else {
+    slotMachine = new SlotMachineB(minBet);
+  }
+
+  slotMachine.setBet(betAmount);
+
+  const resultMessage = slotMachine.play();
+  console.log(resultMessage);
 }
 
 main();
